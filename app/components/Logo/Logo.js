@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import {
   View,
-  Image,
   Text,
   ImageBackground,
   Keyboard,
   Animated,
+  Platform,
 } from 'react-native';
 
 import styles from './styles';
@@ -21,13 +21,21 @@ class Logo extends Component {
   }
 
   componentDidMount() {
+    let showListener = 'keyboardWillShow';
+    let hideListener = 'keyboardWillHide';
+
+    if (Platform.OS === 'android') {
+      showListener = 'keyboardDidShow';
+      hideListener = 'keyboardDidHide';
+    }
+
     this.keyboardShowListener = Keyboard.addListener(
-      'keyboardDidShow',
+      showListener,
       this.keyboardShow,
     );
 
     this.keyboardHideListener = Keyboard.addListener(
-      'keyboardDidHide',
+      hideListener,
       this.keyboardHide,
     );
   }
