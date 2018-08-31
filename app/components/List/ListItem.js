@@ -37,7 +37,7 @@ ListItem.propTypes = {
   selected: PropTypes.bool,
   checkMark: PropTypes.bool,
   visible: PropTypes.bool,
-  customIcon: PropTypes.string,
+  customIcon: PropTypes.element,
   iconBackground: PropTypes.string,
 };
 
