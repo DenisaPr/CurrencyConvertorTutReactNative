@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StatusBar, KeyboardAvoidingView } from 'react-native';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 import { Container } from '../components/Container';
 import { Logo } from '../components/Logo';
@@ -9,16 +10,18 @@ import { Button } from '../components/Button';
 import { ConversionDetails } from '../components/ConversionDetails';
 import { Header } from '../components/Header';
 
-const TEMP_BASE_CURRENCY = 'USD';
-const TEMP_QUOTE_CURRENCY = 'GBP';
-const TEMP_BASE_PRICE = '100';
-const TEMP_QUOTE_PRICE = '74.78';
-const TEMP_CONVERSION_RATE = 0.7478;
-const TEMP_CONVERSION_DATE = new Date();
+import { swapCurrency, changeCurrencyAmount } from '../actions/currencies';
 
 class Home extends Component {
   static propTypes = {
     navigation: PropTypes.object,
+    dispatch: PropTypes.func,
+    baseCurrency: PropTypes.string,
+    quoteCurrency: PropTypes.string,
+    conversionRate: PropTypes.number,
+    amount: PropTypes.number,
+    isFetching: PropTypes.bool,
+    lastConvertedDate: PropTypes.object,
   };
 
   handlePressBaseCurrency = () => {
@@ -33,12 +36,16 @@ class Home extends Component {
     navigation.navigate('CurrencyList', { title: 'Quote Currency' });
   };
 
-  handleTextChange = (text) => {
-    console.log('Changed text = ', text);
+  handleTextChange = (amount) => {
+    console.log('Changed text = ', amount);
+    const curObj = this.props;
+    curObj.dispatch(changeCurrencyAmount(amount));
   };
 
   handleOnPressReverseCurency = () => {
     console.log('Reversing Currency');
+    const curObj = this.props;
+    curObj.dispatch(swapCurrency());
   };
 
   handleOptionsPress = () => {
@@ -48,6 +55,13 @@ class Home extends Component {
   };
 
   render() {
+    const curObj = this.props;
+    let quotePrice = (curObj.amount * curObj.conversionRate).toFixed(2);
+
+    if (curObj.isFetching) {
+      quotePrice = '...';
+    }
+
     return (
       <Container>
         <StatusBar translucent={false} barStyle="light-content" />
@@ -57,32 +71,53 @@ class Home extends Component {
           <Logo />
 
           <InputWithButton
-            buttonText={TEMP_BASE_CURRENCY}
+            buttonText={curObj.baseCurrency}
             onPress={this.handlePressBaseCurrency}
-            defaultValue={TEMP_BASE_PRICE}
+            defaultValue={curObj.amount.toString()}
             keyboardType="numeric"
             onChangeText={this.handleTextChange}
           />
 
           <InputWithButton
-            buttonText={TEMP_QUOTE_CURRENCY}
+            buttonText={curObj.quoteCurrency}
             onPress={this.handlePressQuoteCurrency}
             editable={false}
-            value={TEMP_QUOTE_PRICE}
+            value={quotePrice}
           />
 
           <ConversionDetails
-            curencyConversionFrom={TEMP_BASE_CURRENCY}
-            curencyConversionTo={TEMP_QUOTE_CURRENCY}
-            rateConversion={TEMP_CONVERSION_RATE}
-            dateConversion={TEMP_CONVERSION_DATE}
+            curencyConversionFrom={curObj.baseCurrency}
+            curencyConversionTo={curObj.quoteCurrency}
+            rateConversion={curObj.conversionRate}
+            dateConversion={curObj.lastConvertedDate}
           />
 
-          <Button text="Reverse Currency" onPress={this.handleOnPress} />
+          <Button
+            text="Reverse Currency"
+            onPress={this.handleOnPressReverseCurency}
+          />
         </KeyboardAvoidingView>
       </Container>
     );
   }
 }
 
-export default Home;
+const mapStateToProps = (state) => {
+  const baseCurrency = state.currencies.baseCurrency;
+  const quoteCurrency = state.currencies.quoteCurrency;
+  const conversionSelector = state.currencies.conversions[baseCurrency] || {};
+  const rates = conversionSelector.rates || {};
+
+  return {
+    baseCurrency,
+    quoteCurrency,
+    amount: state.currencies.amount,
+    conversionRate: rates[quoteCurrency] || 0,
+    isFetching: conversionSelector.isFetching,
+    lastConvertedDate: conversionSelector.date
+      ? new Date(conversionSelector.date)
+      : new Date(),
+  };
+};
+
+export default connect(mapStateToProps)(Home);
