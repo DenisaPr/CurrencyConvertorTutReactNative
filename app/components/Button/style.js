@@ -7,7 +7,6 @@ export default EStyleSheet.create({
   $buttonBackgroundModifier: 0.1,
 
   buttonContainer: {
-    backgroundColor: '$primaryBlue',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 15,
