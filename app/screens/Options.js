@@ -19,13 +19,13 @@ class Options extends Component {
   };
 
   handleThemesPress = () => {
-    console.log('theme pressed');
+    // console.log('theme pressed');
     const { navigation } = this.props;
     navigation.navigate('Themes', { title: 'Themes' });
   };
 
   handleSitePress = () => {
-    console.log('site pressed');
+    // console.log('site pressed');
     const propsOpt = this.props;
     Linking.openURL('htt22222p://fixer.io').catch(() => propsOpt.alertWithType(
       'error',

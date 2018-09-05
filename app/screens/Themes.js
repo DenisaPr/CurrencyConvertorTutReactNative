@@ -21,7 +21,7 @@ class Themes extends Component {
   };
 
   handleThemesPress = (color) => {
-    console.log('colored theme pressed', color);
+    // console.log('colored theme pressed', color);
     const { navigation } = this.props;
     this.props.dispatch(changePrimaryColor(color));
     navigation.goBack();

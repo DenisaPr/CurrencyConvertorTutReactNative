@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StatusBar, KeyboardAvoidingView } from 'react-native';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { connectAlert } from '../components/Alert';
 
 import { Container } from '../components/Container';
 import { Logo } from '../components/Logo';
@@ -10,7 +11,11 @@ import { Button } from '../components/Button';
 import { ConversionDetails } from '../components/ConversionDetails';
 import { Header } from '../components/Header';
 
-import { swapCurrency, changeCurrencyAmount } from '../actions/currencies';
+import {
+  swapCurrency,
+  changeCurrencyAmount,
+  getInitialConversion,
+} from '../actions/currencies';
 
 class Home extends Component {
   static propTypes = {
@@ -23,10 +28,25 @@ class Home extends Component {
     isFetching: PropTypes.bool,
     lastConvertedDate: PropTypes.object,
     primaryColor: PropTypes.string,
+    alertWithType: PropTypes.func,
+    currencyError: PropTypes.string,
   };
 
+  componentWillMount() {
+    this.props.dispatch(getInitialConversion());
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.currencyError
+      && nextProps.currencyError !== this.props.currencyError
+    ) {
+      this.props.alertWithType('error', 'Error', nextProps.currencyError);
+    }
+  }
+
   handlePressBaseCurrency = () => {
-    console.log('press base');
+    // console.log('press base');
     const { navigation } = this.props;
     navigation.navigate('CurrencyList', {
       title: 'Base Currency',
@@ -35,7 +55,7 @@ class Home extends Component {
   };
 
   handlePressQuoteCurrency = () => {
-    console.log('press quote');
+    // console.log('press quote');
     const { navigation } = this.props;
     navigation.navigate('CurrencyList', {
       title: 'Quote Currency',
@@ -44,19 +64,19 @@ class Home extends Component {
   };
 
   handleTextChange = (amount) => {
-    console.log('Changed text = ', amount);
+    // console.log('Changed text = ', amount);
     const curObj = this.props;
     curObj.dispatch(changeCurrencyAmount(amount));
   };
 
   handleOnPressReverseCurency = () => {
-    console.log('Reversing Currency');
+    // console.log('Reversing Currency');
     const curObj = this.props;
     curObj.dispatch(swapCurrency());
   };
 
   handleOptionsPress = () => {
-    console.log('Options pressed');
+    // console.log('Options pressed');
     const { navigation } = this.props;
     navigation.navigate('Options', { title: 'Options' });
   };
@@ -127,7 +147,8 @@ const mapStateToProps = (state) => {
       ? new Date(conversionSelector.date)
       : new Date(),
     primaryColor: state.theme.primaryColor,
+    currencyError: state.currencies.error,
   };
 };
 
-export default connect(mapStateToProps)(Home);
+export default connect(mapStateToProps)(connectAlert(Home));

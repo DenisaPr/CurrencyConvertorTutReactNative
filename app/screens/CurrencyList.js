@@ -19,7 +19,7 @@ class CurrencyList extends Component {
   handlePress = (currency) => {
     const { navigation } = this.props;
     const { type } = this.props.navigation.state.params;
-    console.log('row pressed', currency, type);
+    // console.log('row pressed', currency, type);
 
     if (type === 'base') {
       // todo
